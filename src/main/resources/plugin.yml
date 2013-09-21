@@ -1,4 +1,4 @@
-main: com.bitlimit.vivify.vivify
+main: com.bitlimit.vivify.Vivify
 name: Vivify
 version: ${project.version}
 author: Kolin Krewinkel
