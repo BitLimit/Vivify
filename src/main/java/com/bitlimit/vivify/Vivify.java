@@ -1,16 +1,29 @@
 package com.bitlimit.vivify;
 
+import net.minecraft.server.v1_6_R2.World;
+import net.minecraft.server.v1_6_R2.WorldServer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_6_R2.CraftWorld;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
-public class Vivify extends JavaPlugin
+public class Vivify extends JavaPlugin implements Listener
 {
     @Override
     public void onEnable()
     {
         super.onEnable();
+
+        this.getServer().getPluginManager().registerEvents(this, this);
 
         // Proof of concept
         String worldName = "world";
@@ -19,11 +32,25 @@ public class Vivify extends JavaPlugin
         {
             private int currentIndex = 0;
             private String m_worldName;
-            private Integer[] indices = {80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81};
+
+            double defaultUpwards = /* 0.225 */ 0;
+//            private Vector[] indices = {new Vector(0, 0.5 + defaultUpwards, 0), new Vector(0.5, 0 + defaultUpwards, 0), new Vector(0, -0.5 + defaultUpwards, 0), new Vector(-0.5, 0 + defaultUpwards, 0)};
+            private Vector[] indices = {new Vector(1, 0, 0), new Vector(1, 0, 0), new Vector(1, 0, 0), new Vector(1, 0, 0), new Vector(1, 0, 0), new Vector(1, 0, 0), new Vector(-1, 0, 0), new Vector(-1, 0, 0), new Vector(-1, 0, 0), new Vector(-1, 0, 0), new Vector(-1, 0, 0), new Vector(-1, 0, 0)};
+            private FloatingBlock floatingBlock;
 
             public BlockRunnable(String worldName)
             {
                 this.m_worldName = worldName;
+
+
+
+                WorldServer world = ((CraftWorld)Bukkit.getWorld(this.m_worldName)).getHandle();
+//                public FloatingBlock(World paramWorld, double paramDouble1, double paramDouble2, double paramDouble3, int paramInt)
+
+                this.floatingBlock = new FloatingBlock(world, (double)0, (double)120, (double)0, Material.SPONGE.getId(), 0);
+                this.floatingBlock.c = 1; // ticksLived
+
+                world.addEntity(this.floatingBlock, CreatureSpawnEvent.SpawnReason.CUSTOM);
             }
 
 
@@ -37,21 +64,27 @@ public class Vivify extends JavaPlugin
                     currentIndex = 0;
                 }
 
-                for (Integer idx : indices)
-                {
-                    Block block = Bukkit.getWorld(this.m_worldName).getBlockAt(0, idx, 0);
-                    block.setType(Material.AIR);
-                }
 
-                Block animatedBlock = Bukkit.getWorld(this.m_worldName).getBlockAt(0, indices[currentIndex], 0);
-                animatedBlock.setType(Material.BEACON);
+                Vector velocity = indices[currentIndex];
+                this.floatingBlock.setVelocity(velocity);
             }
 
         }
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new BlockRunnable(worldName), 5L, 5L);
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new BlockRunnable(worldName), 1L, 1L);
 
     }
+
+    @EventHandler
+    public void onBlockPhysicsEvent(BlockPhysicsEvent event)
+    {
+//        if (event.getM)
+        event.setCancelled(true);
+//        event.getBlock().setTypeId(event.getBlock().getTypeId(), false);
+
+//        Bukkit.broadcastMessage(ChatColor.RED + "Block physics event.");
+    }
+
 
     @Override
     public void onDisable()
