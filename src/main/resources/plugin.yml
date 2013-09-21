@@ -1,0 +1,13 @@
+main: com.bitlimit.vivify.vivify
+name: Vivify
+version: ${project.version}
+author: Kolin Krewinkel
+description: Frame animations in Minecraft.
+website: https://github.com/bitlimit/Vivify/
+commands:
+    vivify:
+        description: Commands for modifying animations and their frames.
+permissions:
+    vivify.*:
+        description: Gives all permissions of Vivify.
+        default: op
